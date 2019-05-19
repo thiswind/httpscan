@@ -4,6 +4,7 @@
 # focked: thiswind
 
 import optparse
+import os
 import Queue
 import re
 import sys
@@ -11,6 +12,7 @@ import threading
 
 import requests
 from IPy import IP
+from requests import ConnectionError, ConnectTimeout, ReadTimeout
 
 printLock = threading.Semaphore(1)  # lock Screen print
 TimeOut = 5  # request timeout
@@ -21,7 +23,7 @@ header = {
     'Connection': 'close'}
 
 
-class scan():
+class Scan(object):
 
     def __init__(self, cidr, threads_num):
         self.threads_num = threads_num
@@ -37,39 +39,58 @@ class scan():
             while self.IPs.qsize() > 0:
                 ip = self.IPs.get()
                 try:
-                    r = requests.Session().get('http://' + str(ip),
-                                               headers=header, timeout=TimeOut)
+                    r = requests.Session().get(
+                        'http://' + str(ip),
+                        headers=header,
+                        timeout=TimeOut
+                    )
                     status = r.status_code
-                    title = re.search(r'<title>(.*)</title>',
-                                      r.text)  # get the title
+                    title = re.search(
+                        r'<title>(.*)</title>',
+                        r.text
+                    )  # get the title
                     if title:
-                        title = title.group(1).strip().strip("\r").strip("\n")[
-                                :30]
+                        title = title.group(1).strip().strip("\r").strip("\n")[:30]
+                        title = title.encode('utf-8')
                     else:
                         title = "None"
                     banner = ''
                     try:
-                        banner += r.headers['Server'][
-                                  :20]  # get the server banner
-                    except:
+                        banner += r.headers['Server'][:20]  # get the server banner
+                    except KeyError:
                         pass
+
                     printLock.acquire()
+
                     print "|%-16s|%-6s|%-20s|%-30s|" % (
-                    ip, status, banner, title)
+                        str(ip).strip(),
+                        str(status).strip(),
+                        str(banner).strip(),
+                        str(title).strip()
+                    )
                     print "+----------------+------+--------------------+------------------------------+"
 
                     # Save log
-                    with open("./log/" + self.cidr.strNormal(3) + ".log",
-                              'a') as f:
+                    filename = "./logs/" + self.cidr.strNormal(3) + ".log"
+
+                    with open(filename, 'a') as f:
                         f.write(ip + "\n")
 
-                except Exception, e:
-                    printLock.acquire()
+                except ConnectTimeout:
+                    pass
+                except ConnectionError:
+                    pass
+                except ReadTimeout:
+                    pass
                 finally:
                     printLock.release()
 
     # Multi thread
     def run(self):
+
+        if not os.path.exists(os.path.dirname('./logs/')):
+            os.makedirs(os.path.dirname('./logs/'))
+
         for i in range(self.threads_num):
             t = threading.Thread(target=self.request)
             t.start()
@@ -77,9 +98,10 @@ class scan():
 
 if __name__ == "__main__":
     parser = optparse.OptionParser("Usage: %prog [options] target")
-    parser.add_option("-t", "--thread", dest="threads_num",
-                      default=10, type="int",
-                      help="[optional]number of  theads,default=10")
+    parser.add_option(
+        "-t", "--thread", dest="threads_num",default=10, type="int",
+        help="[optional]number of  theads,default=10"
+    )
     (options, args) = parser.parse_args()
     if len(args) < 1:
         parser.print_help()
@@ -89,5 +111,5 @@ if __name__ == "__main__":
     print "|     IP         |Status|       Server       |            Title             |"
     print "+----------------+------+--------------------+------------------------------+"
 
-    s = scan(cidr=args[0], threads_num=options.threads_num)
+    s = Scan(cidr=args[0], threads_num=options.threads_num)
     s.run()
