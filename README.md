@@ -9,7 +9,7 @@ Example:`python2 httpscan.py 10.20.30.0/24 –t 10`
 
 
 ```
-(venv) ❯❯❯❯ python2 httpscan.py 192.168.31.1 -t 64                                                                                                   ~/w/httpscan master
+(venv) ❯❯❯❯ python2 httpscan.py 192.168.31.0/24 -t 16                                                                                                   ~/w/httpscan master
 +----------------+------+--------------------+------------------------------+
 |     IP         |Status|       Server       |            Title             |
 +----------------+------+--------------------+------------------------------+
