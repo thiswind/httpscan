@@ -5,7 +5,7 @@ httpscan会返回IP http状态码 Web容器版本 以及网站标题。
 
 **Usage**：`python2 httpscan IP/CIDR –t threads`
 
-Example:`python2 httpscan.py 10.20.30.0/24 –t 10`
+Example:
 
 
 ```
