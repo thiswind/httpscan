@@ -80,11 +80,11 @@ class Scan(object):
                         f.write(ip + "\n")
 
                 except ConnectTimeout:
-                    pass
+                    printLock.release()
                 except ConnectionError:
-                    pass
+                    printLock.release()
                 except ReadTimeout:
-                    pass
+                    printLock.release()
                 finally:
                     printLock.release()
 
