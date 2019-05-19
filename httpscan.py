@@ -9,7 +9,6 @@ import Queue
 import re
 import sys
 import threading
-import chardet
 
 import requests
 from IPy import IP
@@ -52,13 +51,15 @@ class Scan(object):
                         r.text
                     )  # get the title
                     if title:
-                        title = title.group(1).strip().strip("\r").strip("\n")[:30]
+                        title = title.group(1).strip().strip("\r").strip("\n")[
+                                :30]
                         title = title.encode('utf-8')
                     else:
                         title = "None"
                     banner = ''
                     try:
-                        banner += r.headers['Server'][:20]  # get the server banner
+                        banner += r.headers['Server'][
+                                  :20]  # get the server banner
                     except KeyError:
                         pass
 
@@ -101,7 +102,7 @@ class Scan(object):
 if __name__ == "__main__":
     parser = optparse.OptionParser("Usage: %prog [options] target")
     parser.add_option(
-        "-t", "--thread", dest="threads_num",default=10, type="int",
+        "-t", "--thread", dest="threads_num", default=10, type="int",
         help="[optional]number of  theads,default=10"
     )
     (options, args) = parser.parse_args()
