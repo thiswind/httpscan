@@ -9,6 +9,7 @@ import Queue
 import re
 import sys
 import threading
+import chardet
 
 import requests
 from IPy import IP
@@ -44,6 +45,7 @@ class Scan(object):
                         headers=header,
                         timeout=TimeOut
                     )
+                    r.encoding = 'utf-8'
                     status = r.status_code
                     title = re.search(
                         r'<title>(.*)</title>',
@@ -62,7 +64,7 @@ class Scan(object):
 
                     printLock.acquire()
 
-                    print "|%-16s|%-6s|%-20s|%-30s|" % (
+                    print "|%-16s|%-6s|%-20s|%-30s" % (
                         str(ip).strip(),
                         str(status).strip(),
                         str(banner).strip(),
